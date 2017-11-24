@@ -1,0 +1,91 @@
+# Foswiki translation for Ukrainian
+# Translator:
+#   Foswiki:Main/SerhijDubyk, 2007
+msgid ""
+msgstr ""
+"Project-Id-Version: Foswiki $ld\n"
+"Report-Msgid-Bugs-To: foswiki-svn@lists.sourceforge.net\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2016-12-29 22:21+0200\n"
+"Last-Translator: Vadim Belman <vrurg@lflat.org>\n"
+"Language-Team: <translation@linux.org.ua>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 2.4\n"
+"X-Poedit-Language: Ukrainian\n"
+"X-Poedit-Country: UKRAINE\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:325
+msgid "and"
+msgstr "та"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:143
+msgid "day"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:144
+msgid "days"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:147
+msgid "hour"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:148
+#, fuzzy
+msgid "hours"
+msgstr "6 годин тому"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:149
+#, fuzzy
+msgid "minute"
+msgstr "%*(%1, хв.) "
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:150
+msgid "minutes"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:140
+msgid "month"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:141
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:142
+msgid "months"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:297
+msgid "null"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:151
+#, fuzzy
+msgid "second"
+msgstr "%*(%1, сек.) "
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:152
+msgid "seconds"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:145
+msgid "week"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:146
+#, fuzzy
+msgid "weeks"
+msgstr "2 тижні тому"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:138
+msgid "year"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:139
+msgid "years"
+msgstr ""
+

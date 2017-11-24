@@ -1,0 +1,5 @@
+*,v
+*~
+locale/**/*.mo
+DateManipPlugin_installer.pl
+DateManipPlugin.zip

@@ -1,0 +1,394 @@
+%META:TOPICINFO{author="micha" comment="reprev" date="1511283158" format="1.1" reprev="4" version="6"}%
+---+!! %TOPIC%
+%FORMFIELD{"Description"}%
+
+%TOC%
+
+---++ Description
+
+This plugin adds the power of date-time manipulations of [[https://metacpan.org/pod/Date::Manip][Date::Manip]] to Foswiki:
+
+   * localized formatting of date time 
+   * time deltas, durations
+   * recurrences
+
+In addition all calculations can either be performed in "standard" mode or in "business" mode. Standard arithmetics are performed
+based on the normal calendar relationship. In business mode off times are left out. Only working days of a week, work times per day
+and holidays are excluded from calcuating durations, deltas and recurences. 
+
+---++ Related plugins and macros
+There are related plugins that have a feature overlap with this one.
+
+   * [[Foswiki:Extensions/TimeSincePlugin][TimeSincePlugin]]: can only render durations, is superseded by the =%DURATION= macro
+   * [[%SYSTEMWEB%.SpreadSheetPlugin][SpreadSheetPlugin]]: its =%FORMATTIMEDIFF= is yet another implementation of the same feature that =%DURATION= provides; this plugin is able to perform simple time calculations
+   * [[Foswiki:Extensions/DateTimePlugin][DateTimePlugin]]: this is another plugin to add more flexibility to the core date macros of Foswiki; 
+     albeit its name it does _not_ use the [[https://metacpan.org/pod/DateTime][DateTime]] and its related perl packages; localization as well as supported date formats are rather limitted
+   * there are a set of core macros ([[%SYSTEMWEB%.VarGMTIME][%GMTIME]], [[%SYSTEMWEB%.VarDATE][%DATE]], [[%SYSTEMWEB%.VarSERVERTIME][%SERVERTIME]], etc) that all tend to cover the same feature, however are rather limited and not localized
+
+None of the previous work covers recurrences or a "business" mode of date calculations.
+
+---++ Language support
+
+Date::Manip is able to parse a wide variety of date formats, as well as understands date times and deltas specified by a limited set of natural language
+in various languages. 
+
+Supported languages are:
+
+   1 Catalan
+   1 Danish
+   1 Dutch
+   1 English
+   1 Finnish
+   1 French
+   1 German
+   1 Italian
+   1 Norwegian
+   1 Polish
+   1 Portugue
+   1 Romanian
+   1 Russian
+   1 Spanish
+   1 Swedish
+   1 Turkish
+
+Unless specified explicitly in the macro or via the =LANGUAGE= preference setting, the browser's language is used to parse and render date times and deltas.
+
+See the [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Lang/english.pod][list of english terms]] that can be used in dates. 
+
+---++ Examples
+
+---+++ Dates
+<verbatim class="tml">
+%DATETIME{"today"}%
+
+%DATETIME{"1st Thursday in June 1992"}%
+
+%DATETIME{"05/10/93"}%
+
+%DATETIME{"8:00pm December tenth"}%
+
+%DATETIME{"2017/11/21" delta="one week later"}%
+
+%DATETIME{"now" delta="in two hours three minutes"}%
+
+%DATETIME{"jetzt" delta="vor zwei tagen" language="de"}%
+
+%DATETIME{"2/Mar/1999 15:30:00 +0500"}%
+
+%DATETIME{"Jan 30 1999 13:00 EST"}%
+
+%DATETIME{"epoch 1511259079"}%
+
+%DATETIME{"1er decembre 1990" language="fr"}%
+</verbatim>
+
+---+++ Durations
+
+<verbatim class="tml">
+%DURATION{"in 12 hours"}%
+
+%DURATION{"-1:30:0"}%
+
+%DURATION{"4 business days later"}%
+</verbatim>
+
+---+++ Recurrences
+
+Every second hour today
+
+<verbatim class="tml">
+%RECURRENCE{
+   frequency="0:0:0:0:2:0:0"
+   start="today"
+   end="tomorrow"
+}%
+</verbatim>
+
+2nd Tuesday of every month from Jan 1 1999 to Apr 30 1999
+
+<verbatim class="tml">
+%RECURRENCE{
+   frequency="0:1*2:2:0:0:0" 
+   start="Jan 1 1999" 
+   end="Apr 30 1999"
+   format="   * $weekday, $day $month $year"
+   separator="$n"
+}%
+</verbatim>
+
+Monday after Easter in 1997-1999
+
+<verbatim class="tml">
+%RECURRENCE{"*1997-1999:0:0:0:0:0:0*EASTER,ND1"}%
+</verbatim>
+
+---++ Syntax
+
+---+++ %DATETIME
+This macro is used to output a date and/or a time or any portion of it. A point in time can either be specified directly in one of the many formats understood, or using an additional delta which is either added or subtracted from the base date.
+
+| *Parameter* | *Description* | *Default* |
+| ="&lt;date-spec>"=, =date="&lt;date-spec>"= | date; see the list of valid date formats below | =now= |
+| =delta="&lt;delta-spec>"= | a duration added or subtracted from the given =date= | =0:0:0:0:0:0:0= |
+| =business="&lt;boolean>"= | switch to enable/disable business date arithmetics | =off= |
+| =subtract="&lt;boolean>"= | switch to enable subtraction of the given =delta= | =off= |
+| =format="&lt;format-spec>"= | format string to render the date time output; see below for valid format strings | =$Foswiki::cfg{DateManipPlugin}{DefaultDateTimeFormat}= or =%d %b %Y - %H:%M= |
+| =lang="..."=, =language="..."= | code of language that =date= is parsed as well as formatted | =LANGUAGE= preference setting or the browser's default language |
+
+A =&lt;format-spec>= may use either the [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Date.pod#PRINTF-DIRECTIVES][printf directives of Date::Manip]] or Foswiki's own tokens as per [[%SYSTEMWEB%.VarGMTIME]]
+with a few additions and diversions.
+
+---++++ Foswiki tokens
+| *Token* | *Unit* | *Example* | 
+| =$iso= | ISO format timestamp | %GMTIME{"$iso"}% |
+| =$rcs= | RCS format timestamp | %GMTIME{"$rcs"}% |
+| =$http= | E-mail & http format timestamp | %GMTIME{"$http"}% |
+| =$year= | 4 digit year | 1999 |
+| =$ye= | 2 digit year | 99 |
+| =$month= | name of month | December |
+| =$mon= | short name of month | Dec |
+| =$mo= | 2 digit month | 12 |
+| =$weekday= | name of day of the week | Tuesday |
+| =$wday= | short name of day of the week | Tue |
+| =$day= | day of month | 31 |
+| =$dow= | day of the week (Sun = 0) | 2  |
+| =$doy= | day of the year | 123 |
+| =$dom= | day of the month with suffix | 1rst, 2nd, ... |
+| =$hours= | hours 00 - 23 | 23 |
+| =$h= | hours 0 - 23 | 7 |
+| =$hours12= | hours 01 - 12 | 11 |
+| =$h12= | hours 1 - 12 pm/am | 7 pm |
+| =$minutes= | minutes | 59 |
+| =$seconds= | seconds | 59 |
+| =$week= | number of week in year (ISO 8601) | 34 |
+| =$tz= | time zone abbreviation | EDT |
+| =$offset= | time zone as GMT offset | +0100 |
+| =$epoch= | number of seconds since 00:00 on 1st January, 1970 | %GMTIME{"$epoch"}% |
+
+---++++ Printf tokens
+
+<verbatim>
+Year
+    %y     year                     - 00 to 99
+    %Y     year                     - 0001 to 9999
+
+Month, Week
+    %m     month of year            - 01 to 12
+    %f     month of year            - " 1" to "12"
+    %b,%h  month abbreviation       - Jan to Dec
+    %B     month name               - January to December
+
+Day
+    %j     day of the year          - 001 to 366
+    %d     day of month             - 01 to 31
+    %e     day of month             - " 1" to "31"
+    %v     weekday abbreviation     - " S"," M"," T", ...
+    %a     weekday abbreviation     - Sun to Sat
+    %A     weekday name             - Sunday to Saturday
+    %w     day of week              - 1 to 7 (1=Monday)
+    %E     day of month with
+           suffix                   - 1st, 2nd, 3rd...
+
+Hour
+    %H     hour                     - 00 to 23
+    %k     hour                     - " 0" to "23"
+    %i     hour                     - " 1" to "12"
+    %I     hour                     - 01 to 12
+    %p     AM or PM
+
+Minute, Second, Time zone
+    %M     minute                   - 00 to 59
+    %S     second                   - 00 to 59
+    %Z     time zone abbreviation   - EDT
+    %z     time zone as GMT offset  - +0100 (see Note 4)
+    %N     time zone as GMT offset  - +01:00:00
+
+Epoch (see NOTE 3 below)
+    %s     seconds from
+           1/1/1970 GMT             - negative if before
+    %o     seconds from 1/1/1970
+           in the current time
+           zone
+
+Date, Time
+    %c     %a %b %e %H:%M:%S %Y     - Fri Apr 28 17:23:15 1995
+    %C,%u  %a %b %e %H:%M:%S %Z %Y  - Fri Apr 28 17:25:57 EDT 1995
+    %g     %a, %d %b %Y %H:%M:%S %Z - Fri, 28 Apr 1995 17:23:15 EDT
+    %D     %m/%d/%y                 - 04/28/95
+    %x     %m/%d/%y or %d/%m/%y     - 04/28/95 or 28/04/95
+                                      (Depends on DateFormat variable)
+    %l     date in ls(1) format (see NOTE 1 below)
+             %b %e %H:%M            - Apr 28 17:23 (*)
+             %b %e  %Y              - Apr 28  1993 (*)
+    %r     %I:%M:%S %p              - 05:39:55 PM
+    %R     %H:%M                    - 17:40
+    %T,%X  %H:%M:%S                 - 17:40:58
+    %V     %m%d%H%M%y               - 0428174095
+    %Q     %Y%m%d                   - 19961025
+    %q     %Y%m%d%H%M%S             - 19961025174058
+    %P     %Y%m%d%H:%M:%S           - 1996102517:40:58
+    %O     %Y-%m-%dT%H:%M:%S        - 1996-10-25T17:40:58
+    %F     %A, %B %e, %Y            - Sunday, January  1, 1996
+    %K     %Y-%j                    - 1997-045
+
+Special Year/Week formats (see NOTE 2 below)
+    %G     year, Monday as first
+           day of week              - 0001 to 9999
+    %W     week of year, Monday
+           as first day of week     - 01 to 53
+    %L     year, Sunday as first
+           day of week              - 0001 to 9999
+    %U     week of year, Sunday
+           as first day of week     - 01 to 53
+    %J     %G-W%W-%w                - 1997-W02-2
+
+Other formats
+    %n     insert a newline character
+    %t     insert a tab character
+    %%     insert a `%' character
+    %+     insert a `+' character
+
+All other characters are currently unused, but may be used in the
+future.  They currently insert the character following the %.
+
+The following multi-character formats also exist:
+
+Extended formats
+    %<A=NUM>   These returns the NUMth value of the %A, %a, and %v formats
+    %<a=NUM>   respectively.  In English, that would yield:
+    %<v=NUM>      %<A=2>   => Tuesday
+                  %<a=2>   => Tue
+                  %<v=2>   => T
+               NUM must be in the range 1-7.
+
+    %<B=NUM>   These return the NUMth value of the %B and %b formats
+    %<b=NUM>   respectively.  In English, that would yield:
+                  %<B=2>   => February
+                  %<b=2>   => Feb
+               NUM must be in the range 1-12 (or 01-12).
+
+    %<p=NUM>   These return the NUMth value of the %p format.  In
+               English, that would yield:
+                  %<p=1>   => AM
+                  %<p=2>   => PM
+               NUM must be in the range 1-2.
+
+    %<E=NUM>   These return the NUMth value of the %E format.  In
+               English, that would yield:
+                  %<E=1>   => 1st
+                  %<E=53>  => 53rd
+               NUM must be in the range 1-53.
+</verbatim>
+
+---+++ %DURATION
+
+This macro returns the number of seconds, minuts, hours, ..., years in the specified delta. A duration can either be given
+by two dates =from= and =to= or directly as in "in two hours" or the like. The output is either rendered using a given duraction spec string in the =format= parameter
+or via a list of units such as in "2 days 3 hours and 1 minute"
+
+| *Parameter* | *Description* | *Default* |
+| ="&lt;delta-spec>"= | duration of the time span; if specified =from= and =to= are not used | =0:0:0:0:0:0:0= |
+| =from="&lt;date-spec>"= | time span start | =now= |
+| =to="&lt;date-spec>"= | time span end | =now= |
+| =lang="..."=, =language="..."= | code of language that =from= and =to= is parsed | =LANGUAGE= preference setting or the browser's default language |
+| =business="&lt;boolean>"= | switch to enable/disable business date arithmetics | =off= |
+| =subtract="&lt;boolean>"= | switch to subtract =from= from =to= rather than the other way around | =off= |
+| =format="&lt;delta-spec>"= | if specfified will render the delta based on a "delta-spec"; for example =%Dt= will return the raw delta value in Date::Manip's delta notation; if not will the number of hours, minutes, seconds etc be returned | |
+| =years="&lt;boolean>"= | switch on/off the "years" unit | =on= |
+| =months="&lt;boolean>"= | switch on/off the "months" unit | =on= |
+| =weeks="&lt;boolean>"= | switch on/off the "weeks" unit | =on= |
+| =days="&lt;boolean>"= | switch on/off the "days" unit | =on= |
+| =hours="&lt;boolean>"= | switch on/off the "hours" unit | =on= |
+| =minutes="&lt;boolean>"= | switch on/off the "minutes" unit | =on= |
+| =seconds="&lt;boolean>"= | switch on/off the "seconds" unit | =on= |
+| =null="..."= | string to be returned for a duration of zero seconds | =null= |
+| =units="..."= | maximum number of units to use; the rest of the duration value is truncated | |
+
+A duration is stored internally as a vector =1:2:3:4:5:6:7= which specifies the years, months, weeks, days, hours, minutes and seconds of a duration.
+In general each of these values can be positive as well as negative. Tokens of a %DURATION's format string start with a =%=. A single =%= is replaced by a double =%%=.
+
+| *Token* | *Description* | *Example* |
+| =%[+][pad][width]Xv= | directives to print out a single field; X is one of y,M,w,d,h,m,s, pad is =<=, =>= or =0= | ="Month: %Mv"=: Month 2, ="Day: %+05v"=: Day: +0004 |
+| =%[+][pad][width][.precision] XYZ= | directives to print out several fields in terms of one of them; X, Y, and Z are each one of y,M,w,d,h,m,s | =%sdh= day and hour fields in terms of seconds, ="%.4Myw months"=: 14.6900 monts |
+| =%[+][pad][width]DXY= | directives to print out portions of the duration; X and Y are each one of y,M,w,d,h,m,s | =%+Dyd=: +1:+2:+3:+4 |
+| =%[+][pad][width]Dt= | directive to print out all of the duration
+
+If _no_ =format= string is specified a list of units is returne and the =years=, =months=, =weeks=, =days=, =hours=, =minutes= and =seconds= parameters take effect, as well as =limit=, =units= and =null=.
+
+For example 
+
+<verbatim class="tml">
+%DURATION{from="12:00" to="18:47:03"}%
+</verbatim>
+
+will return
+
+<pre>6 hours, 47 minutes and 3 seconds</pre>
+
+in case your browser language is set to English
+
+or 
+
+<pre>6 Stunden, 47 Minuten und 3 Sekunden</pre>
+
+when set to German.
+
+*WARNING*: right now Date::Manip does not support localized output of durations by itself. The _output_ of the =%DURATION= macro is not affected by its =language= parameter. 
+It only affects the way a =&lt;delta-spec>= or =&lt;date-spec>= is _parsed in_. Thus we are using Foswiki's support for internationalization, i.e. its =%MAKETEXT= macro ... which however does not produce
+any other language's output other than the browser's currently configured one.
+
+---+++ %RECURRENCE
+
+A recurrence is a compact specification of a set of dates. This macro will render a list of date times within the given recurrence. 
+Please have a look at [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Recur.pod#FREQUENCY-NOTATION][the official frequency notation]]] for a detailed explanation.
+A recurrence can either be specified in the compact notation - such as in ="*1997-1999:0:0:0:0:0:0*EASTER,ND1"= - or separated into the five base parameter, =frequency=, =start=, =end=, =base= and =modifiers=.
+Either a =rec-spec= or a =frequency= parameter is mandatory. The parameters =frequency=, =start=, =end=, =base= and =modifiers= are ignored once a =rec-spec= is provide. If no =end= date is specified the
+recurrence is open. Make sure that you restrict the output of returned dates using the =limit= parameter.
+
+| *Parameter* | *Description* | *Default* |
+| ="&lt;rec-spec>"= | recurrence specifier | |
+| =freq="..."=, =frequency="..."= | frequency specifier | |
+| =start="&lt;date-spec>"= | date when the recurence starts | =now= |
+| =end="&lt;date-spec>"= | date when the recurence ends | |
+| =base="&lt;date-spec>"= | base date when the recurence starts; this date is used by the =modifiers=, i.e. to specify an offset for the recurrence | |
+| =limit="..."= | maximum number of dates rendered in the output | 1000 |
+| =lang="..."=, =language="..."= | output language of date times  | =LANGUAGE= preference setting or the browser's default language |
+| =format="&format-spec>"= | format string to render a date time in the list of returned dates | =$Foswiki::cfg{DateManipPlugin}{DefaultDateTimeFormat}= or =%d %b %Y - %H:%M= |
+| =header="..."= | header string prepended to the output in case the recurrence is not empty | |
+| =footer="..."= | footer string appended to the output in case the recurrence is not empty | |
+| =separator="..."= | separator string between returned lines returned | |
+
+---++ Valid formats
+
+Part of the power of Date::Manip is its cheer amount of formats of dates, times and durations it is able to parse. So instead of repeating the documentation available online for this perl package here are simply the links to
+the real source of the documentation.
+
+   * [[https://metacpan.org/pod/Date::Manip::Date#VALID-DATE-FORMATS][date formats]]
+   * [[https://metacpan.org/pod/Date::Manip::Date#VALID-TIME-FORMATS][time formats]]
+   * [[https://metacpan.org/pod/Date::Manip::Date#VALID-COMBINED-DATE-AND-TIME-FORMATS][combined date and time formats]]
+   * [[https://metacpan.org/pod/Date::Manip::Date#VALID-TIME-ZONE-FORMATS][timezone formats]]
+   * [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Delta.pod][delta formats]]
+   * [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Recur.pod#FREQUENCY-NOTATION][frequency notation]] 
+   * [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Recur.pod#MODIFIERS][recurrence modifiers]]
+
+---++ Installation Instructions
+%$INSTALL_INSTRUCTIONS%
+
+---++ Dependencies
+%$DEPENDENCIES%
+
+---++ Change History
+
+%TABLE{columnwidths="7em" tablewidth="100%"}%
+|  24 Nov 2017 | initial release |
+
+%META:FORM{name="PackageForm"}%
+%META:FIELD{name="Author" title="Author" value="Michael Daum"}%
+%META:FIELD{name="Version" title="Version" value="%25$VERSION%25"}%
+%META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
+%META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
+%META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
+%META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
+%META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

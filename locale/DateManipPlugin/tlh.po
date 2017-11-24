@@ -1,0 +1,87 @@
+# Foswiki translation for <Language>
+# Translators:
+#   <add-yourself-here>
+msgid ""
+msgstr ""
+"Project-Id-Version: Foswiki $Id\n"
+"Report-Msgid-Bugs-To: foswiki-svn@lists.sourceforge.net\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2017-07-18 15:15+0200\n"
+"Last-Translator: Lieven L. Litaer <qephom@gmx.de>\n"
+"Language-Team: none\n"
+"Language: tlh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 2.4\n"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:325
+msgid "and"
+msgstr "&&#39;ej"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:143
+msgid "day"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:144
+msgid "days"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:147
+msgid "hour"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:148
+#, fuzzy
+msgid "hours"
+msgstr "6 rep ret"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:149
+#, fuzzy
+msgid "minute"
+msgstr "%*(%1,tup) "
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:150
+msgid "minutes"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:140
+msgid "month"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:141
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:142
+msgid "months"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:297
+msgid "null"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:151
+#, fuzzy
+msgid "second"
+msgstr "%*(%1,lup) "
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:152
+msgid "seconds"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:145
+msgid "week"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:146
+#, fuzzy
+msgid "weeks"
+msgstr "2 Hogh ret"
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:138
+msgid "year"
+msgstr ""
+
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:139
+msgid "years"
+msgstr ""
+

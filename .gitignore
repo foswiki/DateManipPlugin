@@ -1,5 +1,11 @@
+*.swp
 *,v
 *~
 locale/**/*.mo
 DateManipPlugin_installer.pl
 DateManipPlugin.zip
+DateManipPlugin.md5
+DateManipPlugin.sha1
+DateManipPlugin.tgz
+DateManipPlugin.txt
+DateManipPlugin_installer

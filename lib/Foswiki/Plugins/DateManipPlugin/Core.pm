@@ -106,6 +106,8 @@ sub DATETIME {
   try {
     my $dateStr = $params->{_DEFAULT} || $params->{date} || "epoch ".time;
 
+    $dateStr = "epoch $dateStr" if $dateStr =~ /^\d+$/;
+
     my $date = $this->getDate($params);
     my $err = $date->parse($dateStr);
     throw Error::Simple($date->err) if $err;
@@ -125,7 +127,6 @@ sub DATETIME {
     $result = _inlineError(shift);
   };
 
-  $result =~ s/Jän\b/Jan/g; # SMELL: strange german traslation
   return Foswiki::Func::decodeFormatTokens($result);
 }
 
@@ -262,7 +263,6 @@ sub RECURRENCE {
     $result = _inlineError(shift);
   };
 
-  $result =~ s/Jän\b/Jan/g; # SMELL: strange german traslation
   return Foswiki::Func::decodeFormatTokens($result);
 }
 
@@ -274,7 +274,10 @@ sub formatDate {
 
   _translateFormat($format); # for compatibility with DateTimeFormat and other Foswiki formats
 
-  return $date->printf($format);
+  my $result = $date->printf($format);
+  $result =~ s/Jän\b/Jan/g; # SMELL: strange german traslation
+
+  return $result;
 }
 
 sub formatDelta {

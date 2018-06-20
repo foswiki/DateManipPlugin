@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="micha" comment="reprev" date="1511283158" format="1.1" reprev="4" version="6"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1529486317" format="1.1"  version="1"}%
 ---+!! %TOPIC%
 %FORMFIELD{"Description"}%
 
@@ -200,10 +200,10 @@ Minute, Second, Time zone
     %M     minute                   - 00 to 59
     %S     second                   - 00 to 59
     %Z     time zone abbreviation   - EDT
-    %z     time zone as GMT offset  - +0100 (see Note 4)
+    %z     time zone as GMT offset  - +0100 
     %N     time zone as GMT offset  - +01:00:00
 
-Epoch (see NOTE 3 below)
+Epoch 
     %s     seconds from
            1/1/1970 GMT             - negative if before
     %o     seconds from 1/1/1970
@@ -217,7 +217,7 @@ Date, Time
     %D     %m/%d/%y                 - 04/28/95
     %x     %m/%d/%y or %d/%m/%y     - 04/28/95 or 28/04/95
                                       (Depends on DateFormat variable)
-    %l     date in ls(1) format (see NOTE 1 below)
+    %l     date in ls(1) format
              %b %e %H:%M            - Apr 28 17:23 (*)
              %b %e  %Y              - Apr 28  1993 (*)
     %r     %I:%M:%S %p              - 05:39:55 PM
@@ -231,7 +231,7 @@ Date, Time
     %F     %A, %B %e, %Y            - Sunday, January  1, 1996
     %K     %Y-%j                    - 1997-045
 
-Special Year/Week formats (see NOTE 2 below)
+Special Year/Week formats 
     %G     year, Monday as first
            day of week              - 0001 to 9999
     %W     week of year, Monday
@@ -311,7 +311,7 @@ In general each of these values can be positive as well as negative. Tokens of a
 | =%[+][pad][width]Xv= | directives to print out a single field; X is one of y,M,w,d,h,m,s, pad is =<=, =>= or =0= | ="Month: %Mv"=: Month 2, ="Day: %+05v"=: Day: +0004 |
 | =%[+][pad][width][.precision] XYZ= | directives to print out several fields in terms of one of them; X, Y, and Z are each one of y,M,w,d,h,m,s | =%sdh= day and hour fields in terms of seconds, ="%.4Myw months"=: 14.6900 monts |
 | =%[+][pad][width]DXY= | directives to print out portions of the duration; X and Y are each one of y,M,w,d,h,m,s | =%+Dyd=: +1:+2:+3:+4 |
-| =%[+][pad][width]Dt= | directive to print out all of the duration
+| =%[+][pad][width]Dt= | directive to print out all of the duration | |
 
 If _no_ =format= string is specified a list of units is returne and the =years=, =months=, =weeks=, =days=, =hours=, =minutes= and =seconds= parameters take effect, as well as =limit=, =units= and =null=.
 
@@ -380,6 +380,7 @@ the real source of the documentation.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  20 Jun 2018 | monkey patch core date time parser and formatter with own one |
 |  28 May 2018 | support "all ints" epoch seconds without having to prefix it with "epoch" (compatibility with !DateTimePlugin) | 
 |  24 Nov 2017 | initial release |
 

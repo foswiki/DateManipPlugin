@@ -42,6 +42,8 @@ sub new {
     @_
   }, $class);
 
+  $this->{_numCallsToParseTime} = 0;
+
   $this->{_session} = $session;
   $this->init;
 
@@ -93,6 +95,8 @@ sub init {
 sub finish {
   my $this = shift;
 
+  _writeDebug("numCallsToParseTime=$this->{_numCallsToParseTime}");
+
   undef $this->{_session};
   undef $this->{_secondsOfUnit};
 }
@@ -104,12 +108,10 @@ sub DATETIME {
   my $result = "";
 
   try {
-    my $dateStr = $params->{_DEFAULT} || $params->{date} || "epoch ".time;
-
-    $dateStr = "epoch $dateStr" if $dateStr =~ /^\d+$/;
-
     my $date = $this->getDate($params);
-    my $err = $date->parse($dateStr);
+
+    my $dateStr = $params->{_DEFAULT} || $params->{date} || "epoch ".time;
+    my $err = $date->parse(_fixDateTimeString($dateStr));
     throw Error::Simple($date->err) if $err;
 
     if (defined $params->{delta}) {
@@ -133,7 +135,6 @@ sub DATETIME {
 sub DURATION {
   my ($this, $params, $topic, $web) = @_;
 
-  #
   # ... to please gettext
   #
   # %MAKETEXT{"year"}%
@@ -166,15 +167,15 @@ sub DURATION {
 
     if(defined $fromStr || defined $toStr) {
       # date mode
-      $fromStr ||= "epoch ".time;
-      $toStr ||= "epoch ".time;
+      $fromStr //= "epoch ".time;
+      $toStr //= "epoch ".time;
 
       my $fromDate = $this->getDate($params);
-      my $err = $fromDate->parse($fromStr);
+      my $err = $fromDate->parse(_fixDateTimeString($fromStr));
       throw Error::Simple($fromDate->err) if $err;
 
       my $toDate = $this->getDate($params);
-      $err = $toDate->parse($toStr);
+      $err = $toDate->parse(_fixDateTimeString($toStr));
       throw Error::Simple($toDate->err) if $err;
 
       $delta = $fromDate->calc($toDate, $isSubtract, $isBusiness?"business":"exact");
@@ -266,16 +267,89 @@ sub RECURRENCE {
   return Foswiki::Func::decodeFormatTokens($result);
 }
 
+# implements Foswiki::Time::formatTime
+sub compatFormatTime {
+  my ($this, $epoch, $format, $tz, $params) = @_;
+
+  $params ||= {};
+  $params->{format} //= $format;
+  $params->{format} //= $Foswiki::cfg{DefaultDateFormat};
+  $params->{tz} //= $tz;
+  $params->{tz} //= $Foswiki::cfg{DisplayTimeValues};
+
+  my $date = $this->getDate($params);
+  my $err = $date->parse("epoch $epoch");
+  throw Error::Simple($date->err) if $err;
+
+  return $this->formatDate($date, $params);
+}
+
+# implements Foswiki::Time::formatDelta
+# sub compatFormatDelta {
+#   my ($this, $epoch, $dummy, $params) = @_;
+#
+#   $params ||= {};
+#
+#   my $delta = $this->getDelta($params);
+#   my $err = $delta->parse($epoch);
+#
+#   if ($err) {
+#     Foswiki::Func::writeWarning($delta->err);
+#     return "";
+#   }
+#
+#   my $result = $this->formatDelta($delta, $params);
+#     
+#   return;
+# }
+
+# implements Foswiki::Time::parseTime
+# defaultLocale ignored for now
+sub compatParseTime {
+  my ($this, $string, $defaultLocal, $params) = @_;
+
+  $this->{_numCallsToParseTime}++;
+
+  # SMELL: statistics is really slowed down by Date::Manip -> lets use the old time parser
+  if (Foswiki::Func::getContext()->{statistics}) {
+    return Foswiki::Time::origParseTime($string, $defaultLocal);
+  }
+
+  # SMELL: currently ignores defaultLocale param
+
+  $params ||= {};
+  my $date = $this->getDate($params);
+  my $err = $date->parse(_fixDateTimeString($string));
+
+  if ($err) {
+    #print STDERR $date->err.", string=$string\n";
+    Foswiki::Func::writeWarning($date->err.", string=$string");
+    return;
+  }
+
+  my $result = $date->printf("%s");
+
+  #print STDERR "parseTime($string) -> $result\n";
+
+  return $result;
+}
 
 sub formatDate {
   my ($this, $date, $params) = @_;
 
   my $format = $params->{format} || $Foswiki::cfg{DateManipPlugin}{DefaultDateTimeFormat} || '%d %b %Y - %H:%M';
 
+  my $tz = _getTimezone($params);
+  $format = '$year-$mo-$dayT$hours:$minutes:$secondsZ' if $format =~ /^\$?iso$/ && $tz eq "GMT";
+
   _translateFormat($format); # for compatibility with DateTimeFormat and other Foswiki formats
 
   my $result = $date->printf($format);
   $result =~ s/Jän\b/Jan/g; # SMELL: strange german traslation
+
+  # rewrite iso tz string
+  $result =~ s/\0\+0000\0/Z/;
+  $result =~ s/\0([+-]\d\d)(\d\d)\0/$1:$2/; 
 
   return $result;
 }
@@ -376,21 +450,42 @@ sub _configObj {
     "WorkDayEnd", $this->{workDayEnd},
   );
 
+  my $tz = _getTimezone($params);
+  $obj->config("setdate", "now,$tz") if $tz;
+
   return $obj;
 }
+
+sub _getTimezone {
+  my ($params) = @_;
+
+  my $tz = $params->{tz} // $Foswiki::cfg{DisplayTimeValues};
+  my $format = $params->{format} || $Foswiki::cfg{DateManipPlugin}{DefaultDateTimeFormat} || '%d %b %Y - %H:%M';
+
+  $tz = 'GMT' if $format =~ m/http/i;
+  $tz = 'GMT' if $tz eq 'gmtime';
+  $tz = '' if $tz eq 'servertime';
+
+  return $tz;
+}
+
 
 sub _translateFormat {
 
   # predefined formats
-  my $iso  = '$year-$mo-$dayT$hours:$minutes:$secondsZ';
+  my $iso  = '$year-$mo-$dayT$hours:$minutes:$seconds$isotz';
   my $rcs  = '$year/$mo/$day $hours:$minutes:$seconds';
   my $http = '$wday, $day $mon $year $hours:$minutes:$seconds $tz';
+  my $longdate = '$day $mon $year - $hours:$minutes';
 
-  $_[0] =~ s/\$iso/$iso/g;
-  $_[0] =~ s/\$rcs/$rcs/g;
-  $_[0] =~ s/\$http/$http/g;
+  $_[0] =~ s/\$(http|email)/\$wday, \$day \$month \$year \$hour:\$min:\$sec \$tz/gi;
+  $_[0] =~ s/\$?iso/$iso/g;
+  $_[0] =~ s/\$?rcs/$rcs/g;
+  $_[0] =~ s/\$?http/$http/g;
+  $_[0] =~ s/\$?email/$http/g;
+  $_[0] =~ s/\$?longdate/$longdate/g;
 
-  $_[0] =~ s/\$year/%Y/g;
+  $_[0] =~ s/\$year?s?/%Y/g;
   $_[0] =~ s/\$ye/%y/g;
 
   $_[0] =~ s/\$month/%B/g;
@@ -406,16 +501,18 @@ sub _translateFormat {
 
   $_[0] =~ s/\$hours12/%I %p/g;
   $_[0] =~ s/\$h12/%i %p/g;
-  $_[0] =~ s/\$hours/%H/g;
+  $_[0] =~ s/\$hour?s?/%H/g;
   $_[0] =~ s/\$h/%k/g;
 
-  $_[0] =~ s/\$minutes/%M/g;
-  $_[0] =~ s/\$seconds/%S/g;
+  $_[0] =~ s/\$minu?t?e?s?/%M/g;
+  $_[0] =~ s/\$seco?n?d?s?/%S/g;
 
   $_[0] =~ s/\$week/%W/g;
   $_[0] =~ s/\$tz/%Z/g;
-  $_[0] =~ s/\$offset/%z/g;
+  $_[0] =~ s/\$isotz/\0%z\0/g; # rewrite it later
+  $_[0] =~ s/\$offset/%N/g; 
   $_[0] =~ s/\$epoch/%s/g;
+
 
   return $_[0];
 }
@@ -433,7 +530,19 @@ sub _inlineError {
   #_writeDebug("error: $msg");
   $msg =~ s/:? at .*$//g;
   $msg =~ s/^\s+|\s+$//g;
-  return "<div class='foswikiAlert'>$msg</div>";
+  return "<span class='foswikiAlert'>$msg</span>";
+}
+
+# work around bug in Date::Manip not being able to separate date and time by a dash
+# replaces dash by T (05 May 2018 - 12:00 -> 05 May 2018 T 12:00)
+sub _fixDateTimeString {
+  my $str = shift;
+
+  return "epoch $str" if $str =~ /^-?\d+$/;
+
+  $str =~ s/\s+\-\s+(\d\d?:\d\d?(?:\d\d?\d)?)/ T $1/g; 
+
+  return $str;
 }
 
 1;

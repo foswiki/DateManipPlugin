@@ -19,12 +19,35 @@ use strict;
 use warnings;
 
 use Foswiki::Func ();
+use Foswiki::Time ();
+use Error qw(:try);
 
-our $VERSION = '1.10';
-our $RELEASE = '28 May 2018';
+our $VERSION = '2.00';
+our $RELEASE = '20 Jun 2018';
 our $SHORTDESCRIPTION = 'Date times, durations and recurrences';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
+
+BEGIN {
+  no warnings 'redefine';
+
+  if (1) {
+
+    # patch Foswiki::Time
+    *Foswiki::Time::origFormatTime = \&Foswiki::Time::formatTime;
+    #*Foswiki::Time::origFormatDelta = \&Foswiki::Time::formatDelta;
+    *Foswiki::Time::origParseTime = \&Foswiki::Time::parseTime;
+    *Foswiki::Time::formatTime = sub { return getCore()->compatFormatTime(@_); };
+    #*Foswiki::Time::formatDelta = sub { return getCore()->compatFormatDelta(@_); };
+    *Foswiki::Time::parseTime = sub { return getCore()->compatParseTime(@_); };
+
+    # patch Foswiki::Func
+    *Foswiki::Func::origFormatTime = \&Foswiki::Func::formatTime;
+    *Foswiki::Func::formatTime = sub { return getCore()->compatFormatTime(@_); };
+  }
+
+  use warnings 'redefine';
+}
 
 sub initPlugin {
 
@@ -44,13 +67,15 @@ sub initPlugin {
 }
 
 sub getCore {
+  my ($session) = @_;
+
   unless (defined $core) {
     require Foswiki::Plugins::DateManipPlugin::Core;
-    $core = Foswiki::Plugins::DateManipPlugin::Core->new(shift);
+    $core = Foswiki::Plugins::DateManipPlugin::Core->new($session);
   }
+
   return $core;
 }
-
 
 sub finishPlugin {
   return unless $core;

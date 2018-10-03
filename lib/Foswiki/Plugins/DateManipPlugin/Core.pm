@@ -68,9 +68,9 @@ sub init {
   my $delta;
   my @fields;
 
-  $start = new Date::Manip::Date();
+  $start = $this->getDate();
   $start->parse($this->{workDayBeg});
-  $end = new Date::Manip::Date();
+  $end = $this->getDate();
   $end->parse($this->{workDayEnd});
   $delta = $start->calc($end);
   @fields = $delta->value();
@@ -99,6 +99,8 @@ sub finish {
 
   undef $this->{_session};
   undef $this->{_secondsOfUnit};
+  undef $this->{_defaultLang};
+  undef $this->{_cache};
 }
 
 sub DATETIME {
@@ -167,8 +169,8 @@ sub DURATION {
 
     if(defined $fromStr || defined $toStr) {
       # date mode
-      $fromStr //= "epoch ".time;
-      $toStr //= "epoch ".time;
+      $fromStr = "epoch ".time if !defined($fromStr) || $fromStr eq '';
+      $toStr = "epoch ".time if !defined($toStr) || $toStr eq '';
 
       my $fromDate = $this->getDate($params);
       my $err = $fromDate->parse(_fixDateTimeString($fromStr));
@@ -318,12 +320,12 @@ sub compatParseTime {
   # SMELL: currently ignores defaultLocale param
 
   $params ||= {};
+  $params->{lang} ||= 'en'; # default to english dates
   my $date = $this->getDate($params);
   my $err = $date->parse(_fixDateTimeString($string));
 
   if ($err) {
-    #print STDERR $date->err.", string=$string\n";
-    Foswiki::Func::writeWarning($date->err.", string=$string");
+    # silently ignore
     return;
   }
 
@@ -386,7 +388,7 @@ sub formatDelta {
 
     if ($count) {
       my $label = $unit;
-      $label =~ s/s$//go if $count == 1; # TODO use maketext
+      $label =~ s/s$//g if $count == 1; # TODO use maketext
       push @result, "$count %MAKETEXT{\"$label\"}%";
 
       $index++;
@@ -410,50 +412,71 @@ sub formatDelta {
 sub getLang {
   my ($this, $params) = @_;
 
+  unless (defined $this->{_defaultLang}) {
+    $this->{_defaultLang} = 
+      Foswiki::Func::getPreferencesValue("LANGUAGE") 
+      || $this->{_session}->i18n->language()
+      || 'en';
+  }
+
   return $params->{lang} 
     || $params->{language}
-    || Foswiki::Func::getPreferencesValue("LANGUAGE")
-    || $this->{_session}->i18n->language()
-    || 'en'; 
+    || $this->{_defaultLang};
 }
 
 sub getRecurrence {
   my ($this, $params) = @_;
 
-  return $this->_configObj(new Date::Manip::Recur(), $params);
+  return $this->_getObject("recur", $params);
 }
 
 sub getDate {
   my ($this, $params) = @_;
 
-  return $this->_configObj(new Date::Manip::Date(), $params);
+  return $this->_getObject("date", $params);
 }
 
 sub getDelta {
   my ($this, $params) = @_;
 
-  return $this->_configObj(new Date::Manip::Delta(), $params);
+  return $this->_getObject("delta", $params);
 }
 
-sub _configObj {
-  my ($this, $obj, $params) = @_;
+sub _getObject {
+  my ($this, $type, $params) = @_;
 
   my $lang = $this->getLang($params);
-
-  $obj->config(
-    "Language", $lang, 
-    "DateFormat", $lang eq "en" ? "US" : "non-US",
-    "FirstDay", $this->{firstDay},
-    "WorkWeekBeg", $this->{workWeekBeg},
-    "WorkWeekEnd", $this->{workWeekEnd},
-    "WorkDayBeg", $this->{workDayBeg},
-    "WorkDayEnd", $this->{workDayEnd},
-  );
-
   my $tz = _getTimezone($params);
-  $obj->config("setdate", "now,$tz") if $tz;
+  my $key = $type."::".$tz."::".$lang;
+  my $obj = $this->{_cache}{$key};
 
-  return $obj;
+  unless ($obj) {
+
+    if ($type eq 'date') {
+      $obj = new Date::Manip::Date();
+    } elsif ($type eq 'delta') {
+      $obj = new Date::Manip::Delta();
+    } elsif ($type eq 'recur') {
+      $obj = new Date::Manip::Recur() if $type eq 'recur';
+    } else {
+      die "unknown object type '$type'";
+    }
+
+    $obj->config(
+      "Language", $lang, 
+      "DateFormat", $lang eq "en" ? "US" : "non-US",
+      "FirstDay", $this->{firstDay},
+      "WorkWeekBeg", $this->{workWeekBeg},
+      "WorkWeekEnd", $this->{workWeekEnd},
+      "WorkDayBeg", $this->{workDayBeg},
+      "WorkDayEnd", $this->{workDayEnd},
+    );
+
+    $obj->config("setdate", "now,$tz") if $tz;
+    $this->{_cache}{$key} = $obj; 
+  }
+
+  return $obj->new();
 }
 
 sub _getTimezone {

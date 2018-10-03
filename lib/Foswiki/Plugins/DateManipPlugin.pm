@@ -22,8 +22,8 @@ use Foswiki::Func ();
 use Foswiki::Time ();
 use Error qw(:try);
 
-our $VERSION = '2.00';
-our $RELEASE = '20 Jun 2018';
+our $VERSION = '2.10';
+our $RELEASE = '03 Oct 2018';
 our $SHORTDESCRIPTION = 'Date times, durations and recurrences';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;

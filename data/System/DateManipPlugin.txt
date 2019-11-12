@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="" date="1538555788" format="1.1"  version="1"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1573547687" format="1.1"  version="1"}%
 ---+!! %TOPIC%
 %FORMFIELD{"Description"}%
 
@@ -380,6 +380,7 @@ the real source of the documentation.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  12 Nov 2019 | improve compatibility with default time formatting |
 |  03 Oct 2018 | performance improvement |
 |  20 Jun 2018 | monkey patch core date time parser and formatter with own one |
 |  28 May 2018 | support "all ints" epoch seconds without having to prefix it with "epoch" (compatibility with !DateTimePlugin) | 
@@ -391,7 +392,7 @@ the real source of the documentation.
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2017-2018 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017-2019 Michael Daum http://michaeldaumconsulting.com"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

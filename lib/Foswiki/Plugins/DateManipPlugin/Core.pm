@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# DateManipPlugin is Copyright (C) 2017 Michael Daum http://michaeldaumconsulting.com
+# DateManipPlugin is Copyright (C) 2017-2019 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -76,7 +76,7 @@ sub init {
   @fields = $delta->value();
   my $daySecs = ($fields[6]||0) + ($fields[5]||0) * 60 + ($fields[4]||0) * 60 * 60;
   #print STDERR "daySecs=$daySecs\n";
- 
+
   my $weekDays = $this->{workWeekEnd} - $this->{workWeekBeg} + 1;
   #print STDERR "weekDays=$weekDays\n";
 
@@ -259,7 +259,7 @@ sub RECURRENCE {
       $index++;
       last if $index >= $params->{limit};
     }
-    $result = ($params->{header} || '').join($params->{separator}||', ', @result).($params->{footer}||'') 
+    $result = ($params->{header} || '').join($params->{separator}||', ', @result).($params->{footer}||'')
       if @result;
 
   } catch Error::Simple with {
@@ -271,17 +271,31 @@ sub RECURRENCE {
 
 # implements Foswiki::Time::formatTime
 sub compatFormatTime {
-  my ($this, $epoch, $format, $tz, $params) = @_;
+  my ($this, $string, $format, $tz, $params) = @_;
 
   $params ||= {};
   $params->{format} //= $format;
   $params->{format} //= $Foswiki::cfg{DefaultDateFormat};
   $params->{tz} //= $tz;
   $params->{tz} //= $Foswiki::cfg{DisplayTimeValues};
+  $params->{lang} = $this->getLang($params);
+
+  $string //= '';
 
   my $date = $this->getDate($params);
-  my $err = $date->parse("epoch $epoch");
-  throw Error::Simple($date->err) if $err;
+  my $err;
+
+  if ($string =~ /^\-?\d+$/) {
+    $err = $date->parse("epoch $string");
+  } else {
+    $err = $date->parse($string);
+  }
+
+  if ($err) {
+    # silently ignore
+    print STDERR "ERROR: ".$date->err." in compatFormatTime($string)\n" if TRACE;
+    return "";
+  }
 
   return $this->formatDate($date, $params);
 }
@@ -301,7 +315,7 @@ sub compatFormatTime {
 #   }
 #
 #   my $result = $this->formatDelta($delta, $params);
-#     
+#
 #   return;
 # }
 
@@ -320,20 +334,19 @@ sub compatParseTime {
   # SMELL: currently ignores defaultLocale param
 
   $params ||= {};
-  $params->{lang} ||= 'en'; # default to english dates
+  $params->{lang} = $this->getLang($params);
   my $date = $this->getDate($params);
-  my $err = $date->parse(_fixDateTimeString($string));
+
+  $string = _fixDateTimeString($string);
+  my $err = $date->parse($string);
 
   if ($err) {
     # silently ignore
+    print STDERR "ERROR: ".$date->err." in compatParseTime($string)\n" if TRACE;
     return;
   }
 
-  my $result = $date->printf("%s");
-
-  #print STDERR "parseTime($string) -> $result\n";
-
-  return $result;
+  return $date->printf("%s");
 }
 
 sub formatDate {
@@ -351,7 +364,7 @@ sub formatDate {
 
   # rewrite iso tz string
   $result =~ s/\0\+0000\0/Z/;
-  $result =~ s/\0([+-]\d\d)(\d\d)\0/$1:$2/; 
+  $result =~ s/\0([+-]\d\d)(\d\d)\0/$1:$2/;
 
   return $result;
 }
@@ -413,13 +426,13 @@ sub getLang {
   my ($this, $params) = @_;
 
   unless (defined $this->{_defaultLang}) {
-    $this->{_defaultLang} = 
-      Foswiki::Func::getPreferencesValue("LANGUAGE") 
+    $this->{_defaultLang} =
+      Foswiki::Func::getPreferencesValue("LANGUAGE")
       || $this->{_session}->i18n->language()
       || 'en';
   }
 
-  return $params->{lang} 
+  return $params->{lang}
     || $params->{language}
     || $this->{_defaultLang};
 }
@@ -463,7 +476,7 @@ sub _getObject {
     }
 
     $obj->config(
-      "Language", $lang, 
+      "Language", $lang,
       "DateFormat", $lang eq "en" ? "US" : "non-US",
       "FirstDay", $this->{firstDay},
       "WorkWeekBeg", $this->{workWeekBeg},
@@ -473,7 +486,7 @@ sub _getObject {
     );
 
     $obj->config("setdate", "now,$tz") if $tz;
-    $this->{_cache}{$key} = $obj; 
+    $this->{_cache}{$key} = $obj;
   }
 
   return $obj->new();
@@ -533,7 +546,7 @@ sub _translateFormat {
   $_[0] =~ s/\$week/%W/g;
   $_[0] =~ s/\$tz/%Z/g;
   $_[0] =~ s/\$isotz/\0%z\0/g; # rewrite it later
-  $_[0] =~ s/\$offset/%N/g; 
+  $_[0] =~ s/\$offset/%N/g;
   $_[0] =~ s/\$epoch/%s/g;
 
 
@@ -563,7 +576,7 @@ sub _fixDateTimeString {
 
   return "epoch $str" if $str =~ /^-?\d+$/;
 
-  $str =~ s/\s+\-\s+(\d\d?:\d\d?(?:\d\d?\d)?)/ T $1/g; 
+  $str =~ s/\s+\-\s+(\d\d?:\d\d?(?:\d\d?\d)?)/ T $1/g;
 
   return $str;
 }

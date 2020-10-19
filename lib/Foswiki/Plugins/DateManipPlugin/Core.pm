@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# DateManipPlugin is Copyright (C) 2017-2019 Michael Daum http://michaeldaumconsulting.com
+# DateManipPlugin is Copyright (C) 2017-2020 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -193,11 +193,14 @@ sub DURATION {
     _writeDebug("delta=".$delta->printf('%Dt')) if TRACE;
 
     my $format = $params->{format};
+
     if (defined $format) {
       $result = $delta->printf($format);
+      $result =~ s/\$epoch\b/$this->delta2sec($delta, $isBusiness)/ge;
     } else {
       $result = $this->formatDelta($delta, $params);
     }
+
   } catch Error::Simple with {
     $result = _inlineError(shift);
   };
@@ -326,7 +329,7 @@ sub compatParseTime {
 
   $this->{_numCallsToParseTime}++;
 
-  # SMELL: statistics is really slowed down by Date::Manip -> lets use the old time parser
+  # SMELL: some jobs are really slowed down by Date::Manip -> lets use the old time parser
   if (Foswiki::Func::getContext()->{statistics}) {
     return Foswiki::Time::origParseTime($string, $defaultLocal);
   }
@@ -369,40 +372,56 @@ sub formatDate {
   return $result;
 }
 
-sub formatDelta {
-  my ($this, $delta, $params) = @_;
+sub delta2sec {
+  my ($this, $delta, $isBusiness) = @_;
 
   my $index = 0;
-  my $duration = 0;
+  my $sec = 0;
   my @fields = $delta->value();
 
   #print STDERR "input=".$delta->input."\n";
   #print STDERR "fields=".join(":",@fields)."\n";
-  my $isBusiness = Foswiki::Func::isTrue($params->{business}, 0);
 
   foreach my $unit (qw(years months weeks days hours minutes seconds)) {
     my $val = $fields[$index++];
-    $duration += $val * $this->{_secondsOfUnit}{$isBusiness?"business":"standard"}{$unit};
+    $sec += $val * $this->{_secondsOfUnit}{$isBusiness?"business":"standard"}{$unit};
   }
-  $duration = abs($duration);
+  $sec = abs($sec);
+
+  return $sec;
+}
+
+sub formatDelta {
+  my ($this, $delta, $params) = @_;
+
+  my $isBusiness = Foswiki::Func::isTrue($params->{business}, 0);
+  my $duration = $this->delta2sec($delta, $isBusiness);
+
   #print STDERR "total seconds=$duration\n";
 
-  return $params->{null} || '%MAKETEXT{"null"}%' if $duration == 0;
+  return ($params->{null} // '%MAKETEXT{"null"}%') if $duration == 0;
 
   my @result = ();
   my $numUnits = $params->{units};
-  $index = 0;
+  my $index = 0;
+  my $all = Foswiki::Func::isTrue($params->{all}, 1);
+  my $useLabels = Foswiki::Func::isTrue($params->{labels}, 1);
   foreach my $unit (qw(years months weeks days hours minutes seconds)) {
-    next unless Foswiki::Func::isTrue($params->{$unit}, 1);
+    next unless Foswiki::Func::isTrue($params->{$unit}, $all);
 
     my $factor = $this->{_secondsOfUnit}{$isBusiness?"business":"standard"}{$unit};
     my $count = floor($duration / $factor);
     _writeDebug("duration=$duration, unit=$unit, seconds in $unit=$factor, count=$count");
 
     if ($count) {
-      my $label = $unit;
-      $label =~ s/s$//g if $count == 1; # TODO use maketext
-      push @result, "$count %MAKETEXT{\"$label\"}%";
+
+      if ($useLabels) {
+        my $label = $unit;
+        $label =~ s/s$//g if $count == 1; # TODO use maketext
+        push @result, "$count %MAKETEXT{\"$label\"}%";
+      } else {
+        push @result, $count;
+      }
 
       $index++;
       $duration -= $count * $factor;
@@ -413,10 +432,15 @@ sub formatDelta {
 
   my $result = '';
   if (@result) {
-    my $last = pop @result;
 
-    $result = join(", ", @result) . ' %MAKETEXT{"and"}% ' if @result;
-    $result .= $last;
+    if ($useLabels) {
+      my $last = pop @result;
+
+      $result = join(", ", @result) . ' %MAKETEXT{"and"}% ' if @result;
+      $result .= $last;
+    } else {
+      $result = join(", ", @result);
+    }
   }
 
   return $result;

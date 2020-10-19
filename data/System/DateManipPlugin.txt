@@ -293,7 +293,7 @@ or via a list of units such as in "2 days 3 hours and 1 minute"
 | =lang="..."=, =language="..."= | code of language that =from= and =to= is parsed | =LANGUAGE= preference setting or the browser's default language |
 | =business="&lt;boolean>"= | switch to enable/disable business date arithmetics | =off= |
 | =subtract="&lt;boolean>"= | switch to subtract =from= from =to= rather than the other way around | =off= |
-| =format="&lt;delta-spec>"= | if specfified will render the delta based on a "delta-spec"; for example =%Dt= will return the raw delta value in Date::Manip's delta notation; if not will the number of hours, minutes, seconds etc be returned | |
+| =format="&lt;delta-spec>"= | if specfified will render the delta based on a "delta-spec" or as plain =$epoch= seconds. For example =%Dt= will return the raw delta value in Date::Manip's delta notation; if not will the number of hours, minutes, seconds etc be returned | |
 | =years="&lt;boolean>"= | switch on/off the "years" unit | =on= |
 | =months="&lt;boolean>"= | switch on/off the "months" unit | =on= |
 | =weeks="&lt;boolean>"= | switch on/off the "weeks" unit | =on= |
@@ -301,8 +301,10 @@ or via a list of units such as in "2 days 3 hours and 1 minute"
 | =hours="&lt;boolean>"= | switch on/off the "hours" unit | =on= |
 | =minutes="&lt;boolean>"= | switch on/off the "minutes" unit | =on= |
 | =seconds="&lt;boolean>"= | switch on/off the "seconds" unit | =on= |
+| =all="&lt;boolean>"= | switch on/off all units (seconds, minutes,...,years), so that they can be enabled/disabled individually | =on= |
 | =null="..."= | string to be returned for a duration of zero seconds | =null= |
 | =units="..."= | maximum number of units to use; the rest of the duration value is truncated | |
+| =labels="&lt;boolean>"= | switch on/off labels | =on= |
 
 A duration is stored internally as a vector =1:2:3:4:5:6:7= which specifies the years, months, weeks, days, hours, minutes and seconds of a duration.
 In general each of these values can be positive as well as negative. Tokens of a %DURATION's format string start with a =%=. A single =%= is replaced by a double =%%=.
@@ -380,6 +382,7 @@ the real source of the documentation.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  19 Oct 2020 | fixed compatibility check for <nop>DateTimePlugin; added =$epoch= to =%DURATION= macro | 
 |  12 Nov 2019 | improve compatibility with default time formatting |
 |  03 Oct 2018 | performance improvement |
 |  20 Jun 2018 | monkey patch core date time parser and formatter with own one |
@@ -392,7 +395,7 @@ the real source of the documentation.
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2017-2019 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017-2020 Michael Daum"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

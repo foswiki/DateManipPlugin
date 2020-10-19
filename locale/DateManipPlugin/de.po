@@ -16,67 +16,67 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:403
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:439
 msgid "and"
 msgstr "und"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:145
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:147
 msgid "day"
 msgstr "Tag"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:146
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:148
 msgid "days"
 msgstr "Tage"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:149
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:151
 msgid "hour"
 msgstr "Stunde"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:150
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:152
 msgid "hours"
 msgstr "Stunden"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:151
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:153
 msgid "minute"
 msgstr "Minute"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:152
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:154
 msgid "minutes"
 msgstr "Minuten"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:142
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:144
 msgid "month"
 msgstr "Monat"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:143
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:144
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:145
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:146
 msgid "months"
 msgstr "Monate"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:375
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:402
 msgid "null"
 msgstr "Null"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:153
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:155
 msgid "second"
 msgstr "Sekunde"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:154
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:156
 msgid "seconds"
 msgstr "Sekunden"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:147
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:149
 msgid "week"
 msgstr "Woche"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:148
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:150
 msgid "weeks"
 msgstr "Wochen"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:140
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:142
 msgid "year"
 msgstr "Jahr"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:141
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:143
 msgid "years"
 msgstr "Jahre"

@@ -18,71 +18,71 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 2.4\n"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:403
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:439
 msgid "and"
 msgstr "en"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:145
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:147
 msgid "day"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:146
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:148
 msgid "days"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:149
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:151
 msgid "hour"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:150
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:152
 #, fuzzy
 msgid "hours"
 msgstr "6 uur geleden"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:151
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:153
 #, fuzzy
 msgid "minute"
 msgstr "%*(%1,minuut,minuten) "
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:152
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:154
 msgid "minutes"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:142
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:144
 msgid "month"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:143
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:144
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:145
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:146
 msgid "months"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:375
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:402
 msgid "null"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:153
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:155
 #, fuzzy
 msgid "second"
 msgstr "%*(%1,seconde,seconden) "
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:154
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:156
 msgid "seconds"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:147
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:149
 msgid "week"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:148
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:150
 #, fuzzy
 msgid "weeks"
 msgstr "2 weken geleden"
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:140
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:142
 msgid "year"
 msgstr ""
 
-#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:141
+#: lib/Foswiki/Plugins/DateManipPlugin/Core.pm:143
 msgid "years"
 msgstr ""

@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# DateManipPlugin is Copyright (C) 2017-2019 Michael Daum http://michaeldaumconsulting.com
+# DateManipPlugin is Copyright (C) 2017-2020 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,8 +22,8 @@ use Foswiki::Func ();
 use Foswiki::Time ();
 use Error qw(:try);
 
-our $VERSION = '2.11';
-our $RELEASE = '12 Nov 2019';
+our $VERSION = '3.00';
+our $RELEASE = '19 Oct 2020';
 our $SHORTDESCRIPTION = 'Date times, durations and recurrences';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
@@ -51,7 +51,7 @@ BEGIN {
 
 sub initPlugin {
 
-  if (exists $Foswiki::cfg{Plugins}{DateTimePlugin}{Enabled} && $Foswiki::cfg{Plugins}{DateTimePlugin}{Enabled}) {
+  if (exists $Foswiki::cfg{Plugins}{DateTimePlugin} && $Foswiki::cfg{Plugins}{DateTimePlugin}{Enabled}) {
     Foswiki::Func::writeWarning("Please disable DateTimePlugin. Temporarily renaming DATETIME macro to DATEMANIP.")
       unless $Foswiki::cfg{DateManipPlugin}{QuietDateTimePluginWarning};
 

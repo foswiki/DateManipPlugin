@@ -80,6 +80,10 @@ See the [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Lang/e
 %DATETIME{"1511259079"}%
 
 %DATETIME{"1er decembre 1990" language="fr"}%
+
+%NOW%
+
+%TODAY%
 </verbatim>
 
 ---+++ Durations
@@ -360,6 +364,14 @@ recurrence is open. Make sure that you restrict the output of returned dates usi
 | =footer="..."= | footer string appended to the output in case the recurrence is not empty | |
 | =separator="..."= | separator string between returned lines returned | |
 
+---+++ %NOW
+
+returns the current time in epoch seconds 
+
+---+++ %TODAY
+
+returns today's time in epoch seconds. Basically this is a shortcut for =%<nop>DATETIME{"today" lang="en" format="$epoch"}%=
+
 ---++ Valid formats
 
 Part of the power of Date::Manip is its cheer amount of formats of dates, times and durations it is able to parse. So instead of repeating the documentation available online for this perl package here are simply the links to
@@ -382,6 +394,7 @@ the real source of the documentation.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  28 Apr 2022 | fixed handling of timezones in compatParseTime(); added macros =%NOW= and =%TODAY= |
 |  19 Oct 2020 | fixed compatibility check for <nop>DateTimePlugin; added =$epoch= to =%DURATION= macro | 
 |  12 Nov 2019 | improve compatibility with default time formatting |
 |  03 Oct 2018 | performance improvement |
@@ -395,7 +408,7 @@ the real source of the documentation.
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2017-2020 Michael Daum"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017-2022 Michael Daum"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

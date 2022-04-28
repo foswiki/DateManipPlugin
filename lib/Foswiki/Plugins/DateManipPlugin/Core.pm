@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# DateManipPlugin is Copyright (C) 2017-2020 Michael Daum http://michaeldaumconsulting.com
+# DateManipPlugin is Copyright (C) 2017-2022 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -43,53 +43,9 @@ sub new {
   }, $class);
 
   $this->{_numCallsToParseTime} = 0;
-
   $this->{_session} = $session;
-  $this->init;
 
   return $this;
-}
-
-sub init {
-  my $this = shift;
-
-  $this->{_secondsOfUnit}{standard} = {
-    years   => 60*60*24*365.2425,
-    months  => 60*60*2*365.2425,
-    weeks   => 60*60*24*7,
-    days    => 60*60*24,
-    hours   => 60*60,
-    minutes => 60,
-    seconds => 1,
-  };
-
-  my $start;
-  my $end;
-  my $delta;
-  my @fields;
-
-  $start = $this->getDate();
-  $start->parse($this->{workDayBeg});
-  $end = $this->getDate();
-  $end->parse($this->{workDayEnd});
-  $delta = $start->calc($end);
-  @fields = $delta->value();
-  my $daySecs = ($fields[6]||0) + ($fields[5]||0) * 60 + ($fields[4]||0) * 60 * 60;
-  #print STDERR "daySecs=$daySecs\n";
-
-  my $weekDays = $this->{workWeekEnd} - $this->{workWeekBeg} + 1;
-  #print STDERR "weekDays=$weekDays\n";
-
-  $this->{_secondsOfUnit}{business} = {
-    years   => $daySecs * $weekDays * 52.143,
-    months  => $daySecs * $weekDays * 52.143 / 12,
-    weeks   => $daySecs * $weekDays,
-    days    => $daySecs,
-    hours   => 60*60,
-    minutes => 60,
-    seconds => 1,
-  };
-
 }
 
 sub finish {
@@ -323,7 +279,6 @@ sub compatFormatTime {
 # }
 
 # implements Foswiki::Time::parseTime
-# defaultLocale ignored for now
 sub compatParseTime {
   my ($this, $string, $defaultLocal, $params) = @_;
 
@@ -334,10 +289,9 @@ sub compatParseTime {
     return Foswiki::Time::origParseTime($string, $defaultLocal);
   }
 
-  # SMELL: currently ignores defaultLocale param
-
   $params ||= {};
   $params->{lang} = $this->getLang($params);
+  $params->{tz} = 'GMT' unless $defaultLocal;
   my $date = $this->getDate($params);
 
   $string = _fixDateTimeString($string);
@@ -372,6 +326,53 @@ sub formatDate {
   return $result;
 }
 
+sub getSecondsOfUnit {
+  my ($this, $isBusiness, $unit) = @_;
+
+  unless (exists $this->{_secondsOfUnit}) {
+    #print STDERR "computing seondsOfUnit\n";
+
+    $this->{_secondsOfUnit}{standard} = {
+      years   => 60*60*24*365.2425,
+      months  => 60*60*2*365.2425,
+      weeks   => 60*60*24*7,
+      days    => 60*60*24,
+      hours   => 60*60,
+      minutes => 60,
+      seconds => 1,
+    };
+
+    my $start;
+    my $end;
+    my $delta;
+    my @fields;
+
+    $start = $this->getDate();
+    $start->parse($this->{workDayBeg});
+    $end = $this->getDate();
+    $end->parse($this->{workDayEnd});
+    $delta = $start->calc($end);
+    @fields = $delta->value();
+    my $daySecs = ($fields[6]||0) + ($fields[5]||0) * 60 + ($fields[4]||0) * 60 * 60;
+    #print STDERR "daySecs=$daySecs\n";
+
+    my $weekDays = $this->{workWeekEnd} - $this->{workWeekBeg} + 1;
+    #print STDERR "weekDays=$weekDays\n";
+
+    $this->{_secondsOfUnit}{business} = {
+      years   => $daySecs * $weekDays * 52.143,
+      months  => $daySecs * $weekDays * 52.143 / 12,
+      weeks   => $daySecs * $weekDays,
+      days    => $daySecs,
+      hours   => 60*60,
+      minutes => 60,
+      seconds => 1,
+    };
+  }
+
+  return $this->{_secondsOfUnit}{$isBusiness?"business":"standard"}{$unit};
+}
+
 sub delta2sec {
   my ($this, $delta, $isBusiness) = @_;
 
@@ -384,7 +385,7 @@ sub delta2sec {
 
   foreach my $unit (qw(years months weeks days hours minutes seconds)) {
     my $val = $fields[$index++];
-    $sec += $val * $this->{_secondsOfUnit}{$isBusiness?"business":"standard"}{$unit};
+    $sec += $val * $this->getSecondsOfUnit($isBusiness, $unit);
   }
   $sec = abs($sec);
 
@@ -409,7 +410,7 @@ sub formatDelta {
   foreach my $unit (qw(years months weeks days hours minutes seconds)) {
     next unless Foswiki::Func::isTrue($params->{$unit}, $all);
 
-    my $factor = $this->{_secondsOfUnit}{$isBusiness?"business":"standard"}{$unit};
+    my $factor = $this->getSecondsOfUnit($isBusiness, $unit);
     my $count = floor($duration / $factor);
     _writeDebug("duration=$duration, unit=$unit, seconds in $unit=$factor, count=$count");
 
@@ -443,6 +444,7 @@ sub formatDelta {
     }
   }
 
+  return $params->{null} if defined $params->{null} && $result eq '';
   return $result;
 }
 
@@ -509,7 +511,7 @@ sub _getObject {
       "WorkDayEnd", $this->{workDayEnd},
     );
 
-    $obj->config("setdate", "now,$tz") if $tz;
+    $obj->config("setdate", "zone,$tz") if $tz;
     $this->{_cache}{$key} = $obj;
   }
 
@@ -539,11 +541,11 @@ sub _translateFormat {
   my $longdate = '$day $mon $year - $hours:$minutes';
 
   $_[0] =~ s/\$(http|email)/\$wday, \$day \$month \$year \$hour:\$min:\$sec \$tz/gi;
-  $_[0] =~ s/\$?iso/$iso/g;
-  $_[0] =~ s/\$?rcs/$rcs/g;
-  $_[0] =~ s/\$?http/$http/g;
-  $_[0] =~ s/\$?email/$http/g;
-  $_[0] =~ s/\$?longdate/$longdate/g;
+  $_[0] =~ s/[\b\$]?iso\b/$iso/g;
+  $_[0] =~ s/[\b\$]?rcs\b/$rcs/g;
+  $_[0] =~ s/[\b\$]?http\b/$http/g;
+  $_[0] =~ s/[\b\$]?email\b/$http/g;
+  $_[0] =~ s/[\b\$]?longdate\b/$longdate/g;
 
   $_[0] =~ s/\$year?s?/%Y/g;
   $_[0] =~ s/\$ye/%y/g;
@@ -572,7 +574,6 @@ sub _translateFormat {
   $_[0] =~ s/\$isotz/\0%z\0/g; # rewrite it later
   $_[0] =~ s/\$offset/%N/g;
   $_[0] =~ s/\$epoch/%s/g;
-
 
   return $_[0];
 }

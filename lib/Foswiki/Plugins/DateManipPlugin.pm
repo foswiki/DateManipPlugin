@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# DateManipPlugin is Copyright (C) 2017-2020 Michael Daum http://michaeldaumconsulting.com
+# DateManipPlugin is Copyright (C) 2017-2022 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,8 +22,8 @@ use Foswiki::Func ();
 use Foswiki::Time ();
 use Error qw(:try);
 
-our $VERSION = '3.00';
-our $RELEASE = '19 Oct 2020';
+our $VERSION = '4.00';
+our $RELEASE = '28 Apr 2022';
 our $SHORTDESCRIPTION = 'Date times, durations and recurrences';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
@@ -59,6 +59,13 @@ sub initPlugin {
   } else {
     Foswiki::Func::registerTagHandler('DATETIME', sub { return getCore(shift)->DATETIME(@_); });
   }
+
+  Foswiki::Func::registerTagHandler('NOW', sub { return time(); });
+  Foswiki::Func::registerTagHandler('TODAY', sub { return getCore(shift)->DATETIME({
+    "_DEFAULT" => "today",
+    lang => "en",
+    format => '$epoch',
+  }); });
 
   Foswiki::Func::registerTagHandler('DURATION', sub { return getCore(shift)->DURATION(@_); });
   Foswiki::Func::registerTagHandler('RECURRENCE', sub { return getCore(shift)->RECURRENCE(@_); });

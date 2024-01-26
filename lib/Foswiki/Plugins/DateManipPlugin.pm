@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# DateManipPlugin is Copyright (C) 2017-2022 Michael Daum http://michaeldaumconsulting.com
+# DateManipPlugin is Copyright (C) 2017-2024 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,6 +15,14 @@
 
 package Foswiki::Plugins::DateManipPlugin;
 
+=begin TML
+
+---+ package Foswiki::Plugins::DateManipPlugin
+
+base class to hook into the foswiki core
+
+=cut
+
 use strict;
 use warnings;
 
@@ -22,14 +30,15 @@ use Foswiki::Func ();
 use Foswiki::Time ();
 use Error qw(:try);
 
-our $VERSION = '4.00';
-our $RELEASE = '28 Apr 2022';
+our $VERSION = '4.10';
+our $RELEASE = '%$RELEASE%';
 our $SHORTDESCRIPTION = 'Date times, durations and recurrences';
+our $LICENSECODE = '%$LICENSECODE%';
 our $NO_PREFS_IN_TOPIC = 1;
 our $core;
 
 BEGIN {
-  no warnings 'redefine';
+  no warnings 'redefine'; ## no critic
 
   if (1) {
 
@@ -48,6 +57,14 @@ BEGIN {
 
   use warnings 'redefine';
 }
+
+=begin TML
+
+---++ initPlugin($topic, $web, $user) -> $boolean
+
+initialize the plugin, automatically called during the core initialization process
+
+=cut
 
 sub initPlugin {
 
@@ -73,6 +90,15 @@ sub initPlugin {
   return 1;
 }
 
+=begin TML
+
+---++ getCore() -> $core
+
+returns a singleton Foswiki::Plugins::DateManipPlugin::Core object for this plugin; a new core is allocated 
+during each session request; once a core has been created it is destroyed during =finishPlugin()=
+
+=cut
+
 sub getCore {
   my ($session) = @_;
 
@@ -83,6 +109,15 @@ sub getCore {
 
   return $core;
 }
+
+=begin TML
+
+---++ finishPlugin
+
+finish the plugin and the core if it has been used,
+automatically called during the core initialization process
+
+=cut
 
 sub finishPlugin {
   return unless $core;

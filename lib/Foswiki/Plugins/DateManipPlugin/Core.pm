@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, https://foswiki.org/
 #
-# DateManipPlugin is Copyright (C) 2017-2022 Michael Daum http://michaeldaumconsulting.com
+# DateManipPlugin is Copyright (C) 2017-2024 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,6 +15,16 @@
 
 package Foswiki::Plugins::DateManipPlugin::Core;
 
+=begin TML
+
+---+ package Foswiki::Plugins::DateManipPlugin::Core
+
+core class for this plugin
+
+an singleton instance is allocated on demand
+
+=cut
+
 use strict;
 use warnings;
 use utf8;
@@ -26,6 +36,31 @@ use Error qw(:try);
 use POSIX;
 
 use constant TRACE => 0; # toggle me
+
+my %LANGUAGE_MAP = (
+  da => "da",
+  de => "de",
+  es => "es",
+  fi => "fi",
+  fr =>  "fr",
+  it => "it",
+  nl => "nl",
+  pl => "pl",
+  pt => "pt",
+  "pt-br" => "pt",
+  ru => "ru",
+  sv => "sv",
+  tr => "tr",
+  uk => "en",
+);
+
+=begin TML
+
+---++ ClassMethod new() -> $core
+
+constructor for a Core object
+
+=cut
 
 sub new {
   my $class = shift;
@@ -48,6 +83,14 @@ sub new {
   return $this;
 }
 
+=begin TML
+
+---++ ObjectMethod finish()
+
+called when this object is destroyed
+
+=cut
+
 sub finish {
   my $this = shift;
 
@@ -58,6 +101,14 @@ sub finish {
   undef $this->{_defaultLang};
   undef $this->{_cache};
 }
+
+=begin TML
+
+---++ ObjectMethod DATETIME($params, $topic, $web) -> $string
+
+implements the %DATETIME macro
+
+=cut
 
 sub DATETIME {
   my ($this, $params, $topic, $web) = @_;
@@ -80,6 +131,9 @@ sub DATETIME {
 
       my $isSubtract = Foswiki::Func::isTrue($params->{subtract}, 0);
       $date = $date->calc($delta, $isSubtract);
+    
+      $err = $date->err();
+      throw Error::Simple($err) if $err;
     }
 
     $result = $this->formatDate($date, $params);
@@ -87,8 +141,18 @@ sub DATETIME {
     $result = _inlineError(shift);
   };
 
+  return _inlineError("invalid date") unless defined $result;
+
   return Foswiki::Func::decodeFormatTokens($result);
 }
+
+=begin TML
+
+---++ ObjectMethod DURATION($params, $topic, $web) -> $string
+
+implements the %DURATION macro
+
+=cut
 
 sub DURATION {
   my ($this, $params, $topic, $web) = @_;
@@ -110,7 +174,6 @@ sub DURATION {
   # %MAKETEXT{"minutes"}%
   # %MAKETEXT{"second"}%
   # %MAKETEXT{"seconds"}%
-
 
   _writeDebug("called DURATION()");
   my $result = "";
@@ -152,7 +215,7 @@ sub DURATION {
 
     if (defined $format) {
       $result = $delta->printf($format);
-      $result =~ s/\$epoch\b/$this->delta2sec($delta, $isBusiness)/ge;
+      $result =~ s/\$(epoch|seconds)\b/$this->delta2sec($delta, $isBusiness)/ge;
     } else {
       $result = $this->formatDelta($delta, $params);
     }
@@ -164,6 +227,14 @@ sub DURATION {
   $result =~ s/Jän\b/Jan/g; # SMELL: strange german traslation
   return Foswiki::Func::decodeFormatTokens($result);
 }
+
+=begin TML
+
+---++ ObjectMethod RECURRENCE($params, $topic, $web) -> $string
+
+implements the %RECURRENCE macro
+
+=cut
 
 sub RECURRENCE {
   my ($this, $params, $topic, $web) = @_;
@@ -228,7 +299,14 @@ sub RECURRENCE {
   return Foswiki::Func::decodeFormatTokens($result);
 }
 
-# implements Foswiki::Time::formatTime
+=begin TML
+
+---++ ObjectMethod compatFormatTime($string, $format, $tz, $params)
+
+This method is monkey-patched into the Foswiki::Time package.
+
+=cut
+
 sub compatFormatTime {
   my ($this, $string, $format, $tz, $params) = @_;
 
@@ -278,7 +356,14 @@ sub compatFormatTime {
 #   return;
 # }
 
-# implements Foswiki::Time::parseTime
+=begin TML
+
+---++ ObjectMethod compatParseTime($string, $defaultLocal, $params)
+
+This method is monkey-patched into the Foswiki::Time package.
+
+=cut
+
 sub compatParseTime {
   my ($this, $string, $defaultLocal, $params) = @_;
 
@@ -298,13 +383,24 @@ sub compatParseTime {
   my $err = $date->parse($string);
 
   if ($err) {
-    # silently ignore
-    print STDERR "ERROR: ".$date->err." in compatParseTime($string)\n" if TRACE;
-    return;
+    if ($params->{_doneFallback}) {
+      # silently ignore
+      print STDERR "ERROR: ".$date->err." in compatParseTime($string)\n" if TRACE;
+      return;
+    }
+    $params->{_doneFallback} = 1;
+    $params->{lang} = "en";
+    return $this->compatParseTime($string, $defaultLocal, $params);
   }
 
   return $date->printf("%s");
 }
+
+=begin TML
+
+---++ ObjectMethod formatDate($date, $params) -> $string
+
+=cut
 
 sub formatDate {
   my ($this, $date, $params) = @_;
@@ -317,6 +413,7 @@ sub formatDate {
   _translateFormat($format); # for compatibility with DateTimeFormat and other Foswiki formats
 
   my $result = $date->printf($format);
+  throw Error::Simple("invalid date") unless defined $result;
   $result =~ s/Jän\b/Jan/g; # SMELL: strange german traslation
 
   # rewrite iso tz string
@@ -325,6 +422,12 @@ sub formatDate {
 
   return $result;
 }
+
+=begin TML
+
+---++ ObjectMethod getSecondsOfUnit($isBusiness, $unit) -> $secs
+
+=cut
 
 sub getSecondsOfUnit {
   my ($this, $isBusiness, $unit) = @_;
@@ -373,6 +476,12 @@ sub getSecondsOfUnit {
   return $this->{_secondsOfUnit}{$isBusiness?"business":"standard"}{$unit};
 }
 
+=begin TML
+
+---++ ObjectMethod delta2sec($delta, $isBusiness) -> $secs
+
+=cut
+
 sub delta2sec {
   my ($this, $delta, $isBusiness) = @_;
 
@@ -391,6 +500,12 @@ sub delta2sec {
 
   return $sec;
 }
+
+=begin TML
+
+---++ ObjectMethod formatDelta($delta, $params) -> $string
+
+=cut
 
 sub formatDelta {
   my ($this, $delta, $params) = @_;
@@ -448,6 +563,12 @@ sub formatDelta {
   return $result;
 }
 
+=begin TML
+
+---++ ObjectMethod getLang($params) -> $lang
+
+=cut
+
 sub getLang {
   my ($this, $params) = @_;
 
@@ -455,33 +576,64 @@ sub getLang {
     $this->{_defaultLang} =
       Foswiki::Func::getPreferencesValue("LANGUAGE")
       || $this->{_session}->i18n->language()
-      || 'en';
+      || "en";
   }
 
-  return $params->{lang}
-    || $params->{language}
-    || $this->{_defaultLang};
+  my $lang = $params->{lang} || $params->{language} || $this->{_defaultLang};
+  return $LANGUAGE_MAP{$lang} || "en";
 }
+
+=begin TML
+
+---++ ObjectMethod getRecurrence($params) -> $recur
+
+returns a Date::Manip::Recur object for the given params
+
+=cut
 
 sub getRecurrence {
   my ($this, $params) = @_;
 
-  return $this->_getObject("recur", $params);
+  return $this->getObject("recur", $params);
 }
+
+=begin TML
+
+---++ ObjectMethod getDate($params) -> $date
+
+returns a Date::Manip::Date object for the given params
+
+=cut
 
 sub getDate {
   my ($this, $params) = @_;
 
-  return $this->_getObject("date", $params);
+  return $this->getObject("date", $params);
 }
+
+=begin TML
+
+---++ ObjectMethod getDelta($params) -> $delta
+
+returns a Date::Manip::Delta object for the given params
+
+=cut
 
 sub getDelta {
   my ($this, $params) = @_;
 
-  return $this->_getObject("delta", $params);
+  return $this->getObject("delta", $params);
 }
 
-sub _getObject {
+=begin TML
+
+---++ ObjectMethod getObject($type, $params) -> $obj
+
+returns a Date::Manip::Object object of the given type and params
+
+=cut
+
+sub getObject {
   my ($this, $type, $params) = @_;
 
   my $lang = $this->getLang($params);
@@ -518,6 +670,7 @@ sub _getObject {
   return $obj->new();
 }
 
+# statics
 sub _getTimezone {
   my ($params) = @_;
 
@@ -530,7 +683,6 @@ sub _getTimezone {
 
   return $tz;
 }
-
 
 sub _translateFormat {
 
@@ -577,7 +729,6 @@ sub _translateFormat {
 
   return $_[0];
 }
-
 
 sub _writeDebug {
   return unless TRACE;

@@ -19,9 +19,9 @@ and holidays are excluded from calcuating durations, deltas and recurences.
 ---++ Related plugins and macros
 There are related plugins that have a feature overlap with this one.
 
-   * [[Foswiki:Extensions/TimeSincePlugin][TimeSincePlugin]]: can only render durations, is superseded by the =%DURATION= macro
+   * [[https://foswiki.org/Extensions/TimeSincePlugin][TimeSincePlugin]]: can only render durations, is superseded by the =%DURATION= macro
    * [[%SYSTEMWEB%.SpreadSheetPlugin][SpreadSheetPlugin]]: its =%FORMATTIMEDIFF= is yet another implementation of the same feature that =%DURATION= provides; this plugin is able to perform simple time calculations
-   * [[Foswiki:Extensions/DateTimePlugin][DateTimePlugin]]: this is another plugin to add more flexibility to the core date macros of Foswiki; 
+   * [[https://foswiki.org/Extensions/DateTimePlugin][DateTimePlugin]]: this is another plugin to add more flexibility to the core date macros of Foswiki; 
      albeit its name it does _not_ use the [[https://metacpan.org/pod/DateTime][DateTime]] and its related perl packages; localization as well as supported date formats are rather limitted
    * there are a set of core macros ([[%SYSTEMWEB%.VarGMTIME][%GMTIME]], [[%SYSTEMWEB%.VarDATE][%DATE]], [[%SYSTEMWEB%.VarSERVERTIME][%SERVERTIME]], etc) that all tend to cover the same feature, however are rather limited and not localized
 
@@ -138,6 +138,7 @@ This macro is used to output a date and/or a time or any portion of it. A point 
 | =subtract="&lt;boolean>"= | switch to enable subtraction of the given =delta= | =off= |
 | =format="&lt;format-spec>"= | format string to render the date time output; see below for valid format strings | =$Foswiki::cfg{DateManipPlugin}{DefaultDateTimeFormat}= or =%d %b %Y - %H:%M= |
 | =lang="..."=, =language="..."= | code of language that =date= is parsed as well as formatted | =LANGUAGE= preference setting or the browser's default language |
+| =tz="..."= | timezone to render the time for | see =$Foswiki::cfg{DisplayTimeValues}= |
 
 A =&lt;format-spec>= may use either the [[https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/Date.pod#PRINTF-DIRECTIVES][printf directives of Date::Manip]] or Foswiki's own tokens as per [[%SYSTEMWEB%.VarGMTIME]]
 with a few additions and diversions.
@@ -297,7 +298,7 @@ or via a list of units such as in "2 days 3 hours and 1 minute"
 | =lang="..."=, =language="..."= | code of language that =from= and =to= is parsed | =LANGUAGE= preference setting or the browser's default language |
 | =business="&lt;boolean>"= | switch to enable/disable business date arithmetics | =off= |
 | =subtract="&lt;boolean>"= | switch to subtract =from= from =to= rather than the other way around | =off= |
-| =format="&lt;delta-spec>"= | if specfified will render the delta based on a "delta-spec" or as plain =$epoch= seconds. For example =%Dt= will return the raw delta value in Date::Manip's delta notation; if not will the number of hours, minutes, seconds etc be returned | |
+| =format="&lt;delta-spec>"= | if specfified will render the delta based on a "delta-spec" or as plain =$seconds=. For example =%Dt= will return the raw delta value in Date::Manip's delta notation; if not will the number of hours, minutes, seconds etc be returned | |
 | =years="&lt;boolean>"= | switch on/off the "years" unit | =on= |
 | =months="&lt;boolean>"= | switch on/off the "months" unit | =on= |
 | =weeks="&lt;boolean>"= | switch on/off the "weeks" unit | =on= |
@@ -394,6 +395,7 @@ the real source of the documentation.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  26 Jan 2024 | added mapping from foswiki language ids to Date::Manip ids; added =tz= parameter for =%DATETIME= |
 |  28 Apr 2022 | fixed handling of timezones in compatParseTime(); added macros =%NOW= and =%TODAY= |
 |  19 Oct 2020 | fixed compatibility check for <nop>DateTimePlugin; added =$epoch= to =%DURATION= macro | 
 |  12 Nov 2019 | improve compatibility with default time formatting |
@@ -408,7 +410,7 @@ the real source of the documentation.
 %META:FIELD{name="Release" title="Release" value="%25$RELEASE%25"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%25TOPIC%25"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2017-2022 Michael Daum"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2017-2024 Michael Daum"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
 %META:FIELD{name="Home" title="Home" value="https://foswiki.org/Extensions/%25TOPIC%25"}%
 %META:FIELD{name="Support" title="Support" value="https://foswiki.org/Support/%25TOPIC%25"}%

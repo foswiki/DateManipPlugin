@@ -30,7 +30,7 @@ use Foswiki::Func ();
 use Foswiki::Time ();
 use Error qw(:try);
 
-our $VERSION = '4.10';
+our $VERSION = '4.20';
 our $RELEASE = '%$RELEASE%';
 our $SHORTDESCRIPTION = 'Date times, durations and recurrences';
 our $LICENSECODE = '%$LICENSECODE%';

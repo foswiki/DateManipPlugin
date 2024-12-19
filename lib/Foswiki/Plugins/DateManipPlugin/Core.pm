@@ -94,7 +94,7 @@ called when this object is destroyed
 sub finish {
   my $this = shift;
 
-  _writeDebug("numCallsToParseTime=$this->{_numCallsToParseTime}");
+  #_writeDebug("numCallsToParseTime=$this->{_numCallsToParseTime}");
 
   undef $this->{_session};
   undef $this->{_secondsOfUnit};
@@ -123,10 +123,10 @@ sub DATETIME {
     my $err = $date->parse(_fixDateTimeString($dateStr));
     throw Error::Simple($date->err) if $err;
 
-    if (defined $params->{delta}) {
+    if ($params->{delta}) {
       my $delta = $this->getDelta($params);
       my $isBusiness = Foswiki::Func::isTrue($params->{business}, 0);
-      my $err = $delta->parse($params->{delta}, $isBusiness);
+      $err = $delta->parse($params->{delta}, $isBusiness);
       throw Error::Simple($delta->err) if $err;
 
       my $isSubtract = Foswiki::Func::isTrue($params->{subtract}, 0);
@@ -142,7 +142,6 @@ sub DATETIME {
   };
 
   return _inlineError("invalid date") unless defined $result;
-
   return Foswiki::Func::decodeFormatTokens($result);
 }
 
@@ -325,7 +324,7 @@ sub compatFormatTime {
   if ($string =~ /^\-?\d+$/) {
     $err = $date->parse("epoch $string");
   } else {
-    $err = $date->parse($string);
+    $err = $date->parse($string, 'noholidays');
   }
 
   if ($err) {
@@ -367,6 +366,8 @@ This method is monkey-patched into the Foswiki::Time package.
 sub compatParseTime {
   my ($this, $string, $defaultLocal, $params) = @_;
 
+  return $string if $string =~ /^\-?\d+$/;
+
   $this->{_numCallsToParseTime}++;
 
   # SMELL: some jobs are really slowed down by Date::Manip -> lets use the old time parser
@@ -380,7 +381,7 @@ sub compatParseTime {
   my $date = $this->getDate($params);
 
   $string = _fixDateTimeString($string);
-  my $err = $date->parse($string);
+  my $err = $date->parse($string, 'nospecial', 'noholidays');
 
   if ($err) {
     if ($params->{_doneFallback}) {
@@ -739,9 +740,9 @@ sub _writeDebug {
 sub _inlineError {
   my $msg = shift;
 
-  #_writeDebug("error: $msg");
-  $msg =~ s/:? at .*$//g;
-  $msg =~ s/^\s+|\s+$//g;
+  _writeDebug("error: $msg");
+  $msg =~ s/:? at .*$//gms;
+  $msg =~ s/^\s+|\s+$//gms;
   return "<span class='foswikiAlert'>$msg</span>";
 }
 

@@ -3,6 +3,7 @@ data/System/DateManipPlugin.txt 0644
 lib/Foswiki/Plugins/DateManipPlugin/Config.spec 0644
 lib/Foswiki/Plugins/DateManipPlugin/Core.pm 0644
 lib/Foswiki/Plugins/DateManipPlugin/DEPENDENCIES 0644
+lib/Foswiki/Plugins/DateManipPlugin/MANIFEST 0644
 lib/Foswiki/Plugins/DateManipPlugin.pm 0644
 locale/DateManipPlugin/bg.po 0644
 locale/DateManipPlugin/cs.po 0644

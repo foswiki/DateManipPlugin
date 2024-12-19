@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="" date="1573547687" format="1.1"  version="1"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1734611850" format="1.1"  version="1"}%
 ---+!! %TOPIC%
 %FORMFIELD{"Description"}%
 
@@ -395,6 +395,7 @@ the real source of the documentation.
 ---++ Change History
 
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  19 Dec 2024 | performance fixes parsing standard dates |
 |  26 Jan 2024 | added mapping from foswiki language ids to Date::Manip ids; added =tz= parameter for =%DATETIME= |
 |  28 Apr 2022 | fixed handling of timezones in compatParseTime(); added macros =%NOW= and =%TODAY= |
 |  19 Oct 2020 | fixed compatibility check for <nop>DateTimePlugin; added =$epoch= to =%DURATION= macro | 
